@@ -18,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.scrolltotopbutton.ui.theme.ScrollToTopButtonTheme
 import kotlinx.coroutines.launch
@@ -35,7 +37,7 @@ class MainActivity : ComponentActivity() {
             ScrollToTopButtonTheme {
 
                 val itemModels = buildList {
-                    repeat(15) {
+                    repeat(8) {
                         this += ListItemModel(title = "Title #$it")
                     }
                 }
@@ -47,12 +49,6 @@ class MainActivity : ComponentActivity() {
                         else ButtonState.Collapsed
                     }
                 }
-
-//                val showScrollToTopButton by remember {
-//                    derivedStateOf {
-//                        listState.firstVisibleItemIndex > 0
-//                    }
-//                }
 
                 val scope = rememberCoroutineScope()
                 val buttonHeight = 64.dp
@@ -77,7 +73,8 @@ class MainActivity : ComponentActivity() {
                         LazyColumn(
                             modifier = Modifier.fillMaxHeight(),
                             state = listState,
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
+//                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = VerticalArrangementWithFooter,
                             contentPadding = PaddingValues(16.dp)
                         ) {
                             items(itemModels) { item -> ListItem(model = item) }
@@ -114,6 +111,27 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+}
+
+object VerticalArrangementWithFooter: Arrangement.Vertical {
+
+    override val spacing: Dp
+        get() = 8.dp
+
+    override fun Density.arrange(totalSize: Int, sizes: IntArray, outPositions: IntArray) {
+        var y = 0
+
+        sizes.forEachIndexed { index, size ->
+            outPositions[index] = y
+            y += size
+        }
+
+        if (y < totalSize) {
+            outPositions[outPositions.lastIndex] =
+                totalSize - sizes.last()
+        }
+    }
+
 }
 
 @OptIn(ExperimentalMaterialApi::class)
